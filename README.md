@@ -38,4 +38,20 @@ This project allows users to upload CSV or Excel files and generate interactive 
 **Database**
 - SQLite (optional for extended version)
 
+##  Project Structure
 
+
+analytics-dashboard/
+│
+├── backend/
+│ ├── app.py
+│ ├── analytics_engine.py
+│ ├── database.py
+│ └── templates/
+│ └── index.html
+│
+├── data/
+│ └── uploads/
+│
+├── requirements.txt
+└── README.md
