@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Client Analytics & Decision Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+   <style>
+    body {
+        background-color: #121212;
+        color: white;
+    }
+
+    .card {
+        background-color: #1e1e1e;
+        border: none;
+        color: white;
+        border-radius: 12px;
+    }
+
+    h3 {
+        color: white !important;
+        font-weight: bold;
+    }
+
+    h6 {
+        color: #cccccc;
+    }
+
+    canvas {
+        margin-top: 10px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+    <h2 class="text-center mb-4">🚀 Client Analytics & Decision Dashboard</h2>
+
+    <!-- Upload Section -->
+    <div class="text-center mb-4">
+        <input type="file" id="fileInput" class="form-control mb-2">
+        <button class="btn btn-primary" onclick="uploadFile()">Upload & Analyze</button>
+    </div>
+
+    <!-- KPI Section -->
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card p-3 text-center">
+                <h6>Total Revenue</h6>
+                <h3 id="totalRevenue">0</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 text-center">
+                <h6>Total Profit</h6>
+                <h3 id="totalProfit">0</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 text-center">
+                <h6>Total Units</h6>
+                <h3 id="totalUnits">0</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 text-center">
+                <h6>Deal Close Rate</h6>
+                <h3 id="dealCloseRate">0%</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Charts -->
+    <div class="card p-4 mb-4">
+        <canvas id="monthlyChart"></canvas>
+    </div>
+
+    <div class="card p-4 mb-4">
+        <canvas id="regionChart"></canvas>
+    </div>
+
+    <div class="card p-4">
+        <canvas id="productChart"></canvas>
+    </div>
+    
+
+</div>
+
+<script>
+let uploadedFilePath = null;
+let charts = [];
+
+function uploadFile() {
+
+    let fileInput = document.getElementById("fileInput");
+
+    if (fileInput.files.length === 0) {
+        alert("Please select a file first!");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    fetch("/api/upload", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        uploadedFilePath = data.filepath;
+        loadDashboard();
+    });
+}
+
+function destroyCharts() {
+    charts.forEach(chart => chart.destroy());
+    charts = [];
+}
+
+function loadDashboard() {
+
+    fetch("/api/dashboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filepath: uploadedFilePath })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        destroyCharts();
+
+        // KPIs
+        document.getElementById("totalRevenue").innerText = "$" + data.kpis.total_revenue.toFixed(2);
+        document.getElementById("totalProfit").innerText = "$" + data.kpis.total_profit.toFixed(2);
+        document.getElementById("totalUnits").innerText = data.kpis.total_units;
+        document.getElementById("dealCloseRate").innerText = data.kpis.deal_close_rate + "%";
+
+        // Common chart options
+        const commonOptions = {
+            plugins: {
+                legend: { labels: { color: "white" } }
+            },
+            scales: {
+                x: { ticks: { color: "white" }, grid: { color: "#333" } },
+                y: { ticks: { color: "white" }, grid: { color: "#333" } }
+            }
+        };
+
+        // Monthly Chart
+        charts.push(new Chart(document.getElementById("monthlyChart"), {
+            type: "line",
+            data: {
+                labels: data.monthly_revenue.months,
+                datasets: [{
+                    label: "Monthly Revenue",
+                    data: data.monthly_revenue.revenue,
+                    borderColor: "#0d6efd",
+                    backgroundColor: "rgba(13,110,253,0.2)",
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: commonOptions
+        }));
+
+        // Region Chart
+        charts.push(new Chart(document.getElementById("regionChart"), {
+            type: "bar",
+            data: {
+                labels: data.region_revenue.regions,
+                datasets: [{
+                    label: "Revenue by Region",
+                    data: data.region_revenue.revenue,
+                    backgroundColor: "#198754"
+                }]
+            },
+            options: commonOptions
+        }));
+
+        // Product Chart
+        charts.push(new Chart(document.getElementById("productChart"), {
+            type: "bar",
+            data: {
+                labels: data.product_profit.products,
+                datasets: [{
+                    label: "Profit by Product",
+                    data: data.product_profit.profit,
+                    backgroundColor: "#ffc107"
+                }]
+            },
+            options: commonOptions
+        }));
+
+        // Sales Rep Chart
+        charts.push(new Chart(document.getElementById("salesRepChart"), {
+            type: "bar",
+            data: {
+                labels: data.sales_rep_performance.reps,
+                datasets: [{
+                    label: "Revenue by Sales Rep",
+                    data: data.sales_rep_performance.revenue,
+                    backgroundColor: "#17a2b8"
+                }]
+            },
+            options: commonOptions
+        }));
+
+        // Channel Pie Chart
+        charts.push(new Chart(document.getElementById("channelChart"), {
+            type: "pie",
+            data: {
+                labels: data.channel_performance.channels,
+                datasets: [{
+                    data: data.channel_performance.revenue,
+                    backgroundColor: [
+                        "#0d6efd",
+                        "#198754",
+                        "#ffc107",
+                        "#dc3545"
+                    ]
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { labels: { color: "white" } }
+                }
+            }
+        }));
+
+    });
+}
+
+
+</script>
+
+</body>
+</html>
