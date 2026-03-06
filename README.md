@@ -1,5 +1,5 @@
 # client-analytics-dashboard
-# 🚀 Client Analytics & Decision Dashboard
+# Client Analytics & Decision Dashboard
 
 A full-stack analytics dashboard built using **Flask, Pandas, Chart.js, and Bootstrap**.
 
@@ -7,23 +7,23 @@ This project allows users to upload CSV or Excel files and generate interactive 
 
 ---
 
-## 📊 Features
+# Features
 
-- 📁 Upload CSV / Excel files
-- 📈 Monthly Revenue Trend (Line Chart)
-- 🌍 Revenue by Region (Bar Chart)
-- 📦 Profit by Product (Bar Chart)
-- 📌 Key Business KPIs:
+-  Upload CSV / Excel files
+-  Monthly Revenue Trend (Line Chart)
+- Revenue by Region (Bar Chart)
+-  Profit by Product (Bar Chart)
+-  Key Business KPIs:
   - Total Revenue
   - Total Profit
   - Total Units Sold
   - Deal Close Rate
-- 🌙 Professional Dark UI
-- ⚡ Interactive Charts using Chart.js
+-  Professional Dark UI
+-  Interactive Charts using Chart.js
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 **Backend**
 - Python
@@ -38,6 +38,4 @@ This project allows users to upload CSV or Excel files and generate interactive 
 **Database**
 - SQLite (optional for extended version)
 
----
 
-## 📂 Project Structure
